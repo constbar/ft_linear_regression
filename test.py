@@ -36,7 +36,7 @@ b = 0
 L = 0.001
 epochs = 1000
 
-for i in range(4):
+for i in range(40):
     m, b = gradient_descent(m, b, data, L)
 print(m, b)
 
