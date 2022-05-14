@@ -1,52 +1,34 @@
 #!/usr/bin/python3
-import numpy as np  # ?
-import matplotlib.animation as animation  # ?
 
-
+import sys
+import argparse
+import numpy as np
 import pandas as pd
+
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 # try mypy
-# import plotext as plt
-# y = plt.sin() # sinusoidal signal
-# plt.scatter(y)
-# plt.title('Scatter Plot')
-# plt.show()
-# def key_values for multik
-# try with -2/n
+# try pep8
 
-# can i use plt??
-# other val of lr
-# other val of b0 and b1
-
-# make func of r2
 # можно попробовать задать сразу большой шаг
 # можно попробовать без минуса, для регресси по возврастанию + с большим шагом
-# lr можно задавать как параметр
-# молжно попробовать функицю нормализации без 2йки 37:00
+ # try other lr | lr=0.01 is ok
 
-# сделать инпут на имя файла, не хард код
-# try old normilize
-
-
-# self.b0 = 7900.660
-# self.b1 = -0.019
-# сделать флаг на отрисовку
-
-class Linear_Regression: # -> ???
-    # def __init__(self, lr=0.01, epochs=1001):
-    def __init__(self, lr=0.0001, epochs=10000): # try other lr | lr=0.01 is ok
-        self.df = pd.read_csv('data.csv')  # make try open
-        self.b0 = 0.0
-        self.b1 = 0.0
+class Linear_Regression:
+    def __init__(self, df, lr, epochs, visualization):
+        self.df = df
         self.lr = lr
         self.ep = epochs
+        self.vi = visualization
+
+        self.b0 = 0.0
+        self.b1 = 0.0
         self.frame = 100
 
         self.max_x = self.df['km'].max()
         self.max_y = self.df['price'].max()
         self.norm_x, self.norm_y = self.normalize()
-
 
         self.sst = None
         self.sse_list = list()
@@ -55,52 +37,57 @@ class Linear_Regression: # -> ???
         self.line_params = list()
 
         self.train_model()
-        self.make_animation()
+        if self.vi:
+            self.make_animation()
 
+
+        # print fin results and calcualrtes the R^2
         # print(self.derivative_b0)
         # print(self.derivative_b1)
-
-    def train_model(self) -> None:
-
-        for i in range(self.ep):
-            self.gradient_descent()
-            
-            # if vizualize is ok
-            if not i % self.frame:
-                self.line_params.append([self.derivative_b0, self.derivative_b1])
-                self.ssr_list.append(sum((self.count - self.df['price'].mean()) **2 ))
-                self.sse_list.append(sum ( (self.df['price'] - self.count)** 2  ))
-                self.mse_list.append((sum ( (self.df['price'] - self.count)** 2  ))  / 2 * len(self.df))
-        
-        self.sst = sum((self.df['price'] - self.df['price'].mean())**2)
-        self.line_params = np.array(self.line_params)
-
+        # and write data to file
+        print(self.derivative_b0, self.derivative_b1) # shole be more 1000 iterations
 
     def normalize(self) -> tuple:
         nx = np.array(self.df['km'] / self.df['km'].max())
         ny = np.array(self.df['price'] / self.df['price'].max())
         return nx, ny
 
-    @property
-    def count(self) -> pd.core.series.Series:
-        # print(type(self.derivative_b0 + self.derivative_b1 * self.df['km']))
-        return self.derivative_b0 + self.derivative_b1 * self.df['km']
+    def train_model(self) -> None:
+        for i in range(self.ep):
+            self.gradient_descent()
+            
+            if self.vi:
+                if not i % self.frame:
+                    self.line_params.append([self.derivative_b0, self.derivative_b1]) # del
+                    self.ssr_list.append(sum((self.predicted_coordinates - self.df['price'].mean())**2))
+                    self.sse_list.append(sum((self.df['price'] - self.predicted_coordinates)** 2))
+                    self.mse_list.append((sum((self.df['price'] - self.predicted_coordinates)** 2  )) / 2 * len(self.df))
+        
+        if self.vi:
+            self.sst = sum((self.df['price'] - self.df['price'].mean())**2)
+            self.line_params = np.array(self.line_params)
+
+    def gradient_descent(self) -> None:
+        self.b0 = self.b0 - self.lr * sum(self.predicted_price - self.norm_y) / len(self.norm_y)
+        self.b1 = self.b1 - self.lr * sum((self.predicted_price - self.norm_y) * self.norm_x) / len(self.norm_y)
 
     @property
-    def predicted_price(self) -> np.ndarray:
+    def predicted_price(self) -> np.ndarray: # this not price -> predicted norm coef
         return self.b0 + self.b1 * self.norm_x
 
     @property
-    def derivative_b0(self) -> np.float64:
+    def predicted_coordinates(self) -> pd.core.series.Series:
+        return self.derivative_b0 + self.derivative_b1 * self.df['km']
+        # return self.b0 * self.max_y + self.b1 * (self.max_y / self.max_x) * self.df['km'] # ??? () ???
+
+    @property # del
+    def derivative_b0(self) -> np.float64: # this is not derivative
         return self.b0 * self.max_y
 
     @property
     def derivative_b1(self) -> np.float64:
         return self.b1 * (self.max_y / self.max_x)
 
-    def gradient_descent(self) -> None:
-        self.b0 = self.b0 - self.lr * sum(self.predicted_price - self.norm_y) / len(self.norm_y)
-        self.b1 = self.b1 - self.lr * sum((self.predicted_price - self.norm_y) * self.norm_x) / len(self.norm_y)
 
     def make_animation(self) -> None:
         fig, ax = plt.subplots(dpi=100, num='ft_linear_regression')
@@ -122,7 +109,7 @@ class Linear_Regression: # -> ???
             analitics += f'theta1: {slope:.4f}\n'
             analitics += f'mse = {int(self.mse_list[frame]):,}\n'.replace(',', ' ')
             analitics += f'sse = {int(self.sse_list[frame]):,}\n'.replace(',', ' ')
-            analitics += f'r² =  {(self.ssr_list[frame] / self.sst):.4f}'            
+            analitics += f'r² =  {(self.ssr_list[frame] / self.sst):.4f}' # try count it thru other func
             title.set_text(analitics)
 
         _ = animation.FuncAnimation(fig, func=animator, frames=(self.ep // self.frame), interval=300)
@@ -134,7 +121,49 @@ class Linear_Regression: # -> ???
         plt.show()
 
 if __name__ == '__main__':
-    Linear_Regression() 
-    # if epochs loser tahn 100 -> error
+    parser = argparse.ArgumentParser(
+        description='ft_linear_regression - predicts the price of a car by \
+        using a linear function train with a gradient descent algorithm')
+    parser.add_argument('data',
+                        type=str,
+                        metavar='',
+                        help='data with observations')
+    parser.add_argument('-lr',
+                        type=float,
+                        metavar='',
+                        required=False,
+                        help='set learning rate')
+    parser.add_argument('-ep',
+                        type=int,
+                        metavar='',
+                        required=False,
+                        help='set number of epochs')
+    parser.add_argument('-v', '--visualize',
+                        action='store_true',
+                        help='show a linear regression plot')
+    args = parser.parse_args()
+
+    try:
+        df = pd.read_csv(args.data)
+    except FileNotFoundError:
+        sys.exit('need a valid file')
+
+    if args.lr is None:
+        args.lr = 0.0001 # maybe change val
+    if args.ep is None:
+        args.ep=10000 # change val
+
+    if args.lr <= 0 or args.lr >= 1:
+        sys.exit('try the valid learning rate')
+    if not isinstance(args.ep, int) or args.ep <= 0:
+        sys.exit('the number of epochs must be a positive integer')
+    elif args.ep < 100 and args.visualize:
+        sys.exit('for visualization, the number of epochs must be from 100')
     # catch ValueError -> if lr больше 1
-    # if lr minus to libiya uhodit vniz
+
+    # print(args.data)
+    # print('lr',args.lr)
+    # print('ep',args.ep)
+    # print(args.visualize)
+
+    Linear_Regression(df, args.lr, args.ep, args.visualize)
