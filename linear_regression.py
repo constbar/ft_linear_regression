@@ -26,7 +26,6 @@ class LinearRegression:
         self.sst = None
         self.sse_list = list()
         self.mse_list = list()
-        self.ssr_list = list()
         self.line_params = list()
 
         self.train_model()
@@ -46,9 +45,8 @@ class LinearRegression:
             if self.vis:
                 if not i % self.frame:
                     self.line_params.append([self.b0 * self.max_y, self.b1 * (self.max_y / self.max_x)])
-                    self.ssr_list.append(sum((self.predicted_coordinates - self.df['price'].mean())**2))
                     self.sse_list.append(sum((self.df['price'] - self.predicted_coordinates)** 2))
-                    self.mse_list.append((sum((self.df['price'] - self.predicted_coordinates)** 2  )) / (2 * len(self.df)))
+                    self.mse_list.append((sum((self.df['price'] - self.predicted_coordinates)** 2)) / len(self.df))
 
         if self.vis:
             self.sst = sum((self.df['price'] - self.df['price'].mean())**2)
@@ -86,7 +84,7 @@ class LinearRegression:
             analitics += f'theta1: {slope:.4f}\n'
             analitics += f'mse = {int(self.mse_list[frame]):,}\n'.replace(',', ' ')
             analitics += f'sse = {int(self.sse_list[frame]):,}\n'.replace(',', ' ')
-            analitics += f'r² =  {(self.ssr_list[frame] / self.sst):.4f}'
+            analitics += f'r² =  {(1 - self.sse_list[frame]/self.sst):.4f}'
             title.set_text(analitics)
 
         _ = animation.FuncAnimation(fig, func=animator, frames=(self.ep // self.frame), interval=300)
@@ -102,8 +100,10 @@ class LinearRegression:
         print('learning rate: ', f'{self.lr}'.rjust(13))
         print('theta0:', colored(f'{round(self.b0 * self.max_y, 2)}'.rjust(21), 'green'))
         print('theta1:', colored(f'{round(self.b1 * (self.max_y / self.max_x), 6)}'.rjust(21), 'green'))
-        ssr = sum((self.predicted_coordinates - self.df['price'].mean())**2)
         sst = sum((self.df['price'] - self.df['price'].mean())**2)
+        ssr = sum((self.predicted_coordinates - self.df['price'].mean())**2)
+        mse = ((sum((self.df['price'] - self.predicted_coordinates)** 2)) / len(self.df))**.5
+        print('standart error:', f'{mse:.2f}'.rjust(13))
         print('determination coef:', f'{(ssr / sst):.4f}'.rjust(9))
 
     def write_calculations(self) -> None:
@@ -114,6 +114,3 @@ class LinearRegression:
         wr.at[0, 'theta0'] = self.b0 * self.max_y
         wr.at[0, 'theta1'] = self.b1 * (self.max_y / self.max_x)
         wr.to_csv('weights.csv', index=False)
-
-
-

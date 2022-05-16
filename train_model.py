@@ -25,7 +25,7 @@ if __name__ == '__main__':
                         metavar='',
                         required=False,
                         help='set number of epochs')
-    parser.add_argument('-v', '--visualize',
+    parser.add_argument('-vis', '--visualize',
                         action='store_true',
                         help='show a linear regression plot')
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         args.ep = 2000
 
     if args.lr <= 0 or args.lr >= 1:
-        sys.exit('try the valid learning rate')
+        sys.exit('need a valid learning rate')
     if not isinstance(args.ep, int) or args.ep <= 0:
         sys.exit('the number of epochs must be a positive integer')
     elif args.ep < 100 and args.visualize:
