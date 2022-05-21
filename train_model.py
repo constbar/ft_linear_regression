@@ -50,3 +50,4 @@ if __name__ == '__main__':
 
     lin_reg = LinearRegression(df, args.lr, args.ep, args.visualize)
     lin_reg.write_calculations()
+    
