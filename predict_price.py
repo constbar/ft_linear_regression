@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
 import sys
+
 import numpy as np
 import pandas as pd
 from termcolor import colored
-
 
 if __name__ == '__main__':
 	if len(sys.argv) != 2:
