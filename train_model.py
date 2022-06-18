@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument('data', type=str, help='data with observations')
     parser.add_argument('-lr', type=float, default=0.01, required=False,
                         help='set learning rate')
-    parser.add_argument('-ep', type=int, default=6000, required=False,
+    parser.add_argument('-ep', type=int, default=9000, required=False,
                         help='set number of epochs')
     parser.add_argument('-vis', '--visualize', action='store_true',
                         help='show a linear regression plot')
