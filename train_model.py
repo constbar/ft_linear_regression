@@ -17,7 +17,7 @@ if __name__ == '__main__':
     parser.add_argument('-ep', type=int, default=9000, required=False,
                         help='set number of epochs')
     parser.add_argument('-vis', '--visualize', action='store_true',
-                        help='show a linear regression plot')
+                        required=False, help='show a linear regression plot')
     args = parser.parse_args()
 
     try:
