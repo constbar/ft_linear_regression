@@ -1,6 +1,6 @@
 ## ft_linear_regression
 
-project École 42, where it is necessary to create a program that predicts the price of a car
+a project of École 42, where it is necessary to create a program that predicts the price of a car
 using linear functional train with gradient descent algorithm.
 
 implementation of linear regression with one observation - in this case, the mileage of the car.
